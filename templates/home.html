@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="/static/css/common.css">
+    <script src="/static/js/jquery-3.3.1.js"></script>
+    <script language="JavaScript">
+        $(function () {
+            $('#search_btn').click(function () {
+                let keywords = $('#keywords').val();
+                search_url = 'http://127.0.0.1:8000/home/search_shop?keywords=';
+                $.ajax(
+                        { url: encodeURI(search_url+keywords),
+                            crossDomain: true,
+                        dataType: 'jsonp',
+                        success:function (data) {
+                            {#console.log(data)#}
+                            alert(data)
+                        }
+                    })
+            })
+        })
+    </script>
+    <style type="text/css">
+        #cate {
+            float: left;
+        }
+
+        #cate >ul {
+            width: 200px;
+            position: relative;
+            height:800px;
+        }
+
+        #cate>ul>li{
+            background: gray;
+            padding: 5px;
+        }
+
+        #cate>ul>li:hover{
+            background: white;
+        }
+
+        #cate>ul>li>a{
+            cursor: pointer;
+            font-size: 18px;
+        }
+    </style>
+    <style type="text/css">
+        #sub{
+            display:none;
+            position: absolute;
+            left:200px;
+        }
+
+        #sub >ul {
+            width:500px;
+            height:800px;
+            position:absolute;
+        }
+
+        #sub>ul>li {
+            padding: 5px;
+            border-bottom: 1px solid gray;
+            float: left;
+        }
+        #sub>ul>li>a{
+            padding: 15px;
+            font-size: 16px;
+        }
+
+        #banner {
+            float:left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #banner li{
+            list-style: none;
+        }
+
+        #banner ul li {
+            float:left;
+        }
+
+        #search> img{
+            float:left;
+        }
+
+        #search>div{
+            float: left;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="header" class="clear">
+        <div id="search" class="clear">
+            <img src="/static/img/logo.gif" alt="">
+            <div id="search_div">
+                <input type="text" id="keywords" name="keywords" placeholder="请输入要搜索的商品">
+                <input type="button" id="search_btn" value="搜索">
+            </div>
+        </div>
+        <div id="cate">
+            <ul>
+                {% for cate in cate_list %}
+                <li><a href="">{{ cate.name }}</a>
+                    <div id="sub">
+                        <ul class="clear">
+                            {% for sub in cate.cate_sub_list %}
+                            <li><a href="">{{ sub.name }}</a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div id="banner">
+        <ul>
+            {% for banner in banner_list %}
+            <li><img src="{{ banner.img_addr }}"></li>
+            {% endfor %}
+        </ul>
+    </div>
+    </div>
+    <div id="content"></div>
+    <div id="footer"></div>
+</body>
+</html>
