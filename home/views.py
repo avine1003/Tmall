@@ -4,13 +4,15 @@ import json
 from django.contrib.auth.decorators import login_required
 from django.core import serializers
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Sum
 from django.forms import model_to_dict
 
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
-from home.models import BannerImg, Category, Product, Categorysub, Productimage
+from home.models import BannerImg, Category, Product, Categorysub, Productimage, Property, Propertyvalue
+
 
 #
 # def get_cate(request):
@@ -82,7 +84,7 @@ def get_category_data(request):
     result = {}
     try:
         cate_list = Category.objects.all()
-        banners =[model_to_dict(banner) for banner in BannerImg.objects.all()]
+        banners = [model_to_dict(banner) for banner in BannerImg.objects.all()]
         result['banners'] = banners
 
         li = []
@@ -119,3 +121,50 @@ def get_shop_data(request):
     except:
         result.update(state=400, msg='查询失败')
     return HttpResponse(json.dumps(result), content_type='application/json')
+
+
+def get_shop_detail(request):
+    result = {}
+    try:
+        pid = request.GET.get('pid')
+        product = Product.objects.get(id=pid)
+        # 获取商品的图片对象
+        imgs = product.productimage_set.filter(type='type_single')
+        # 获取商品销量
+        sale_count = product.orderitem_set.all().aggregate(Sum('number')).get('number__sum')
+        # 获取评论数量
+        review_count = product.review_set.count()
+
+        # 获取评论内容对象
+        review_contents = product.review_set.all()
+        review_list = []
+        for content in review_contents:
+            content_dict = model_to_dict(content)
+            content_dict['createdate'] = datetime.datetime.strftime(content_dict['createdate'], '%Y-%m-%d %H:%M:%S')
+            review_list.append(content_dict)
+
+        # 获取商品的属性
+        # [{'name':"品牌", 'value':'Hisense/海信'}, {'name':'型号', 'value':'123'}]
+        property_list = Property.objects.filter(cid=product.cid)
+        propertys = []
+        for property in property_list:
+            property_dic = model_to_dict(property)
+            # 获取属性值表匹配的对象
+            p = property.propertyvalue_set.filter(ptid=property.id, pid=product.id)
+            property_dic['value'] = model_to_dict(p[0])['value']
+            propertys.append(property_dic)
+
+        product = model_to_dict(product)
+        product['createdate'] = datetime.datetime.strftime(product['createdate'], '%Y-%m-%d %H:%M:%S')
+        # 将图片属性加到商品中
+        product['imgs'] = [model_to_dict(img) for img in imgs]
+        product['sale_count'] = sale_count
+        product['review_count'] = review_count
+        product['property'] = propertys
+        product['review_content'] = review_list
+
+        result.update(state=200, msg='success', data=product)
+    except:
+        pass
+    return HttpResponse(json.dumps(result), content_type='application/json')
+

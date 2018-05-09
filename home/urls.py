@@ -22,4 +22,5 @@ urlpatterns = [
     url('cates/', views.get_category_data),
     url('search_shop/', views.search_shop),
     url('shops/', views.get_shop_data),
+    url('detail/', views.get_shop_detail),
 ]

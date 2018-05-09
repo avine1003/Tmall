@@ -169,7 +169,6 @@
         }
     </style>
 
-
     <!--主内容的样式 -->
     <style type="text/css">
         #content h3 {
@@ -215,27 +214,21 @@
         $(function () {
             $.get(shops_url, function (result) {
                 if (null != result && result.state === 200 && result.data.length > 0){
-                    let $content = $('#content');
                     for (let cate of result.data){
-                        let $div = $('<div>');
+                        //let $div = $('<div>');
                         //给div添加元素
-
                         //创建分类标题
-                        let $h3 = $('<h3>').text(cate.name);
-
+                        //let $h3 = $('<h3>').text(cate.name);
                         let $ul = $('<ul>').attr('class', 'clear');
                         if (cate.products.length > 0){
                             for (let product of cate.products){
-                                let $li = $('<li>');
-                                let $a = $('<a>');
-                                $a.append($('<img>').attr('src', IMG_URL + product.img[0].id + '.jpg'))
+                                $ul.append($('<li>').append($('<a>').attr('href', 'http://127.0.0.1:8000/static/detail.html?pid='+ product.id)
+                                    .append($('<img>').attr('src', IMG_URL + product.img[0].id + '.jpg'))
                                     .append($('<span>').text(product.name))
-                                    .append($('<span>').text(product.promoteprice));
-                                $li.append($a);
-                                $ul.append($li)
+                                    .append($('<span>').text(product.promoteprice))))
                             }
                         }
-                        $('#content').append($div.append($h3).append($ul));
+                        $('#content').append($('<div>').append($('<h3>').text(cate.name)).append($ul));
                     }
                 }
             })
